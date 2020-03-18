@@ -1,0 +1,48 @@
+Overall philosophy
+- Micro Services
+- 100% Serverless
+- Create a document with known statistics about each call, e.g - Every auth generates 4 lambda invocations and 2 db writes
+(Unclear how useful this will be, and how hard it would be to maintain in reality, but let's try)
+- Initially three parts of the system - Auth, Clearing & Settlement and Shared
+- Automatic deploys
+
+Auth
+    Authorize
+    Capture
+
+Clearing & Settlement
+    Recive data: This is not a method that is called, but an ongoing process.
+        Calculate Clearing: Runs as data is recieved
+        Calculate Settlement: Runs as data is recieved
+            Balance C&S: Ensure that Clearing and Settlement is constantly balanced
+                (Settled + feees = Cleared)
+                Send Clearing
+                Send Settlement
+Shared
+    Bin Service: Classify a card
+    Card Enums: Not a service
+
+Simulated externals
+    Schemes
+        Auth
+        Clearing
+    Banks
+
+Use case - Happy flow
+- A user pays with card in a store
+- The purchase gets approved
+- The merchant gets paid, minus fees, by the acquirer and the acquirer gets paid by the scheme.
+
+Architecture v1 for happy flow
+authorize(card, ammount, merchant) -> (SUCCESS, TransId)
+capture(TransId) -> SUCCESS
+-> (card, ammount, merchant, TransId) on queue
+Clearing & Settlement Service.recieveData from queue
+    Calculate Clearing
+    Calculate Settlement
+        Calculate Fees
+    Balance books
+
+    End of Day
+        Send Clearing
+        Sent Settlement
